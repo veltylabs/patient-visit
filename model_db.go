@@ -22,6 +22,9 @@ func (m *MedicalHistory) Schema() []orm.Field {
 		{Name: "reason", Type: orm.TypeText, Constraints: orm.ConstraintNotNull},
 		{Name: "diagnostic", Type: orm.TypeText, Constraints: orm.ConstraintNone},
 		{Name: "prescription", Type: orm.TypeText, Constraints: orm.ConstraintNone},
+		{Name: "cie10_code", Type: orm.TypeText, Constraints: orm.ConstraintNone},
+		{Name: "started_at", Type: orm.TypeInt64, Constraints: orm.ConstraintNone},
+		{Name: "finished_at", Type: orm.TypeInt64, Constraints: orm.ConstraintNone},
 		{Name: "patient_name_snapshot", Type: orm.TypeText, Constraints: orm.ConstraintNotNull},
 		{Name: "patient_rut_snapshot", Type: orm.TypeText, Constraints: orm.ConstraintNotNull},
 		{Name: "doctor_name_snapshot", Type: orm.TypeText, Constraints: orm.ConstraintNotNull},
@@ -41,6 +44,9 @@ func (m *MedicalHistory) Values() []any {
 		m.Reason,
 		m.Diagnostic,
 		m.Prescription,
+		m.Cie10Code,
+		m.StartedAt,
+		m.FinishedAt,
 		m.PatientNameSnapshot,
 		m.PatientRutSnapshot,
 		m.DoctorNameSnapshot,
@@ -60,6 +66,9 @@ func (m *MedicalHistory) Pointers() []any {
 		&m.Reason,
 		&m.Diagnostic,
 		&m.Prescription,
+		&m.Cie10Code,
+		&m.StartedAt,
+		&m.FinishedAt,
 		&m.PatientNameSnapshot,
 		&m.PatientRutSnapshot,
 		&m.DoctorNameSnapshot,
@@ -79,6 +88,9 @@ var MedicalHistory_ = struct {
 	Reason string
 	Diagnostic string
 	Prescription string
+	Cie10Code string
+	StartedAt string
+	FinishedAt string
 	PatientNameSnapshot string
 	PatientRutSnapshot string
 	DoctorNameSnapshot string
@@ -95,6 +107,9 @@ var MedicalHistory_ = struct {
 	Reason: "reason",
 	Diagnostic: "diagnostic",
 	Prescription: "prescription",
+	Cie10Code: "cie10_code",
+	StartedAt: "started_at",
+	FinishedAt: "finished_at",
 	PatientNameSnapshot: "patient_name_snapshot",
 	PatientRutSnapshot: "patient_rut_snapshot",
 	DoctorNameSnapshot: "doctor_name_snapshot",
@@ -131,6 +146,8 @@ func (m *MeasurementType) Schema() []orm.Field {
 		{Name: "min_normal", Type: orm.TypeFloat64, Constraints: orm.ConstraintNone},
 		{Name: "max_normal", Type: orm.TypeFloat64, Constraints: orm.ConstraintNone},
 		{Name: "is_active", Type: orm.TypeBool, Constraints: orm.ConstraintNotNull},
+		{Name: "loinc_code", Type: orm.TypeText, Constraints: orm.ConstraintNone},
+		{Name: "ucum_unit", Type: orm.TypeText, Constraints: orm.ConstraintNone},
 	}
 }
 
@@ -142,6 +159,8 @@ func (m *MeasurementType) Values() []any {
 		m.MinNormal,
 		m.MaxNormal,
 		m.IsActive,
+		m.LoincCode,
+		m.UcumUnit,
 	}
 }
 
@@ -153,6 +172,8 @@ func (m *MeasurementType) Pointers() []any {
 		&m.MinNormal,
 		&m.MaxNormal,
 		&m.IsActive,
+		&m.LoincCode,
+		&m.UcumUnit,
 	}
 }
 
@@ -164,6 +185,8 @@ var MeasurementType_ = struct {
 	MinNormal string
 	MaxNormal string
 	IsActive string
+	LoincCode string
+	UcumUnit string
 }{
 	TableName: "measurement_type",
 	ID: "id",
@@ -172,6 +195,8 @@ var MeasurementType_ = struct {
 	MinNormal: "min_normal",
 	MaxNormal: "max_normal",
 	IsActive: "is_active",
+	LoincCode: "loinc_code",
+	UcumUnit: "ucum_unit",
 }
 
 func ReadOneMeasurementType(qb *orm.QB, model *MeasurementType) (*MeasurementType, error) {

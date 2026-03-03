@@ -4,10 +4,13 @@
 The `clinical-encounter` module manages the full lifecycle of a patient's visit to a medical clinic or hospital. It tracks the scheduling, arrival, triage, and consultation states through a Finite State Machine (FSM), as well as clinical measurements (vitals) and history details.
 
 ## 2. Core Entities
-- **MedicalHistory:** The central entity representing a single visit. It contains state, timestamps (`AttentionAt`, `UpdatedAt`), and snapshots of the patient/doctor data at the time of the visit.
-- **MeasurementType:** Reference dictionary for types of vital measurements (e.g., Blood Pressure, Weight, Temperature).
+- **MedicalHistory:** The central entity representing a single visit. It contains state, timestamps (`AttentionAt`, `StartedAt`, `FinishedAt`, `UpdatedAt`), optional diagnosis mappings (`Cie10Code`), and snapshots of the patient/doctor data at the time of the visit.
+- **MeasurementType:** Reference dictionary for types of vital measurements (e.g., Blood Pressure, Weight, Temperature) mapped with `LoincCode` and `UcumUnit`.
 - **ClinicalMeasurement:** The actual measurement values taken during triage or consultation. Linked to `MedicalHistory` and `MeasurementType`.
 - **HistoryDetail:** Details of specific actions or catalog items applied/prescribed during the visit.
+
+## 2.1 FHIR Adapter
+- The internal entities translate to standard HL7/FHIR representations through an adapter layer (`fhir_types.go` and `fhir_adapter.go`). It avoids full REST API refactors but still guarantees proper mappings.
 
 ## 3. Finite State Machine (FSM)
 The lifecycle of a visit strictly aligns with FHIR standards through the following statuses:

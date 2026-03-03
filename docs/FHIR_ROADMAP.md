@@ -21,20 +21,17 @@ Si en el futuro una entidad de salud o gobierno exige interoperar usando HL7/FHI
 
 Para lograr dicha compatibilidad plena, se deberán abordar las siguientes adaptaciones:
 
-### 3.1 Nomenclaturas exactas (Formato de API y Modelos)
+### 3.1 Nomenclaturas exactas (Formato de API y Modelos) - `partially implemented`
 - FHIR requiere documentos JSON con estructuras anidadas muy inflexibles.
 - En vez de devolver campos planos como `PatientID`, FHIR espera referencias formales: `{"subject": {"reference": "Patient/123"}}`.
-- Los endpoints MCP actuales tendrían que ser envueltos o expuestos secundariamente como una API RESTful estándar (e.g., `GET /Encounter/{id}`).
+- El internal adapter provee JSON FHIR, la API REST sigue fuera de alcance actual.
 
-### 3.2 Terminologías Internacionales (Sistemas de Codificación)
-Actualmente, el modelo (`MedicalHistory`) usa campos de texto libre (`Diagnostic string`, `Reason string`). FHIR prohíbe el texto libre como única fuente de verdad médica, requiriendo esquemas internacionales:
-- **CIE-10 / CIE-11 / SNOMED CT:** Para codificar los diagnósticos registrados (ej. guardar el código estandarizado `J00` en lugar del texto "Resfriado común").
-- **LOINC:** En la tabla `MeasurementType`, para registrar qué tipo de medición se tomó (ej. código universal `85354-9` para Presión Arterial).
-- **UCUM:** Unidades de medida clínicas codificadas internacionalmente en lugar de unidades textuales locales (ej. `mm[Hg]`).
+### 3.2 Terminologías Internacionales (Sistemas de Codificación) - `implemented`
+- **CIE-10:** Se implementó `Cie10Code` para diagnósticos en `MedicalHistory`.
+- **LOINC / UCUM:** Se implementaron `LoincCode` y `UcumUnit` en `MeasurementType`. SNOMED CT sigue fuera de alcance.
 
-### 3.3 El Tiempo como Período
-- Nuestro sistema consolida la interacción temporal en un *timestamp* singular (`AttentionAt int64`).
-- FHIR maneja el tiempo del consultorio como un tipo `Period` (compuesto por los atributos obligatorios `start` y `end`) para auditar la duración exacta en que el paciente ocupó el recurso o interactuó con el médico. Se requeriría inferir el inicio y el fin basado en los históricos de la FSM o agregar un nuevo campo al esquema en el futuro.
+### 3.3 El Tiempo como Período - `implemented`
+- Se implementaron los campos `StartedAt` y `FinishedAt` para medir `start` y `end` (Period.start/end) directamente alineados a las transiciones FSM.
 
 ## Conclusión
 La madurez de la arquitectura actual es la correcta para un desarrollo ágil sobre WebAssembly. Al respetar principios de separación de dominios y manejo por eventos de estado, sienta las bases perfectas para añadir interoperabilidad HL7/FHIR a futuro a través de traductores independientes, sin sacrificar rendimiento productivo en la primera fase.
