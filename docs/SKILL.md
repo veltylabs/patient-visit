@@ -15,3 +15,12 @@ The `clinical-encounter` module handles medical consultation lifecycles, clinica
 - `MeasurementType`: Master dictionary for measurement definitions (temperature, height, etc).
 - `ClinicalMeasurement`: A recorded vital sign or clinical measurement tied to a specific `MedicalHistory`.
 - `HistoryDetail`: Used to register actions, diagnosis details, or specific catalog items tied to the visit.
+
+## FHIR Mapping Examples
+```go
+// Translate to FHIR R4 Encounter JSON
+enc := clinicalencounter.ToFHIREncounter(visit)
+
+// Translate to FHIR R4 Observation JSON
+obs := clinicalencounter.ToFHIRObservation(measurement, measurementType, patientID)
+```

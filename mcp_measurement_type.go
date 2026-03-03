@@ -11,6 +11,8 @@ type CreateMeasurementTypeArgs struct {
 	DefaultUnit string  `json:"default_unit"`
 	MinNormal   float64 `json:"min_normal,omitempty"`
 	MaxNormal   float64 `json:"max_normal,omitempty"`
+	LoincCode   string  `json:"loinc_code,omitempty"`
+	UcumUnit    string  `json:"ucum_unit,omitempty"`
 }
 
 func (m *Module) CreateMeasurementType(args CreateMeasurementTypeArgs) (*MeasurementType, error) {
@@ -25,6 +27,8 @@ func (m *Module) CreateMeasurementType(args CreateMeasurementTypeArgs) (*Measure
 		MinNormal:   args.MinNormal,
 		MaxNormal:   args.MaxNormal,
 		IsActive:    true,
+		LoincCode:   args.LoincCode,
+		UcumUnit:    args.UcumUnit,
 	}
 
 	if err := m.db.Create(record); err != nil {

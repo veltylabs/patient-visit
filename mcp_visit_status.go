@@ -95,30 +95,59 @@ func (m *Module) StartVisit(args StartVisitArgs) (*MedicalHistory, error) {
 	if args.ID == "" {
 		return nil, fmt.Err("missing", "id")
 	}
-
-	return m.applyTransition(args.ID, "start_visit")
+	visit, err := getVisitByID(m.db, args.ID)
+	if err != nil {
+		return nil, err
+	}
+	next, ok := visitTransitions[visit.Status]["start_visit"]
+	if !ok {
+		return nil, fmt.Err("invalid", "transition", visit.Status, "->", "start_visit")
+	}
+	visit.Status = next
+	visit.StartedAt = time.Now()
+	visit.UpdatedAt = time.Now()
+	return visit, m.db.Update(visit)
 }
 
 type CompleteVisitArgs struct {
-	ID string `json:"id"`
+	ID           string `json:"id"`
+	Diagnostic   string `json:"diagnostic,omitempty"`
+	Prescription string `json:"prescription,omitempty"`
+	Cie10Code    string `json:"cie10_code,omitempty"`
 }
 
 func (m *Module) CompleteVisit(args CompleteVisitArgs) (*MedicalHistory, error) {
 	if args.ID == "" {
 		return nil, fmt.Err("missing", "id")
 	}
-
-	visit, err := m.applyTransition(args.ID, "complete")
+	visit, err := getVisitByID(m.db, args.ID)
 	if err != nil {
 		return nil, err
 	}
-
+	next, ok := visitTransitions[visit.Status]["complete"]
+	if !ok {
+		return nil, fmt.Err("invalid", "transition", visit.Status, "->", "complete")
+	}
+	visit.Status = next
+	visit.FinishedAt = time.Now()
+	visit.UpdatedAt = time.Now()
+	if args.Diagnostic != "" {
+		visit.Diagnostic = args.Diagnostic
+	}
+	if args.Prescription != "" {
+		visit.Prescription = args.Prescription
+	}
+	if args.Cie10Code != "" {
+		visit.Cie10Code = args.Cie10Code
+	}
+	if err := m.db.Update(visit); err != nil {
+		return nil, err
+	}
 	m.publish(EventVisitCompleted, map[string]any{
 		"visit_id":   visit.ID,
 		"patient_id": visit.PatientID,
 		"doctor_id":  visit.DoctorID,
 	})
-
 	return visit, nil
 }
 
@@ -131,16 +160,23 @@ func (m *Module) CancelVisit(args CancelVisitArgs) (*MedicalHistory, error) {
 	if args.ID == "" {
 		return nil, fmt.Err("missing", "id")
 	}
-
-	visit, err := m.applyTransition(args.ID, "cancel")
+	visit, err := getVisitByID(m.db, args.ID)
 	if err != nil {
 		return nil, err
 	}
-
+	next, ok := visitTransitions[visit.Status]["cancel"]
+	if !ok {
+		return nil, fmt.Err("invalid", "transition", visit.Status, "->", "cancel")
+	}
+	visit.Status = next
+	visit.FinishedAt = time.Now()
+	visit.UpdatedAt = time.Now()
+	if err := m.db.Update(visit); err != nil {
+		return nil, err
+	}
 	m.publish(EventVisitCancelled, map[string]any{
 		"visit_id": visit.ID,
 		"reason":   args.Reason,
 	})
-
 	return visit, nil
 }

@@ -10,6 +10,9 @@ erDiagram
         string reason
         string diagnostic
         string prescription
+        string cie10_code
+        int started_at
+        int finished_at
         string patient_name_snapshot
         string patient_rut_snapshot
         string doctor_name_snapshot
@@ -23,6 +26,8 @@ erDiagram
         float min_normal
         float max_normal
         boolean is_active
+        string loinc_code
+        string ucum_unit
     }
 
     clinical_measurement {

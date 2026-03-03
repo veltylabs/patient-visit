@@ -38,6 +38,9 @@ type MedicalHistory struct {
     Reason                  string `db:"not_null"`
     Diagnostic              string
     Prescription            string
+    Cie10Code               string
+    StartedAt               int64
+    FinishedAt              int64
     PatientNameSnapshot     string `db:"not_null"`
     PatientRutSnapshot      string `db:"not_null"`
     DoctorNameSnapshot      string `db:"not_null"`
@@ -52,6 +55,8 @@ type MeasurementType struct {
     MinNormal   float64
     MaxNormal   float64
     IsActive    bool `db:"not_null"`
+    LoincCode   string
+    UcumUnit    string
 }
 
 type ClinicalMeasurement struct {

@@ -61,6 +61,9 @@ func TestVisitStatusFSM_HappyPath(t *testing.T) {
 	if visit.Status != clinicalencounter.StatusInProgress {
 		t.Errorf("Expected status in_progress, got %s", visit.Status)
 	}
+	if visit.StartedAt == 0 {
+		t.Error("StartedAt must be set after StartVisit")
+	}
 
 	// Completed
 	visit, err = mod.CompleteVisit(clinicalencounter.CompleteVisitArgs{ID: visit.ID})
@@ -69,6 +72,12 @@ func TestVisitStatusFSM_HappyPath(t *testing.T) {
 	}
 	if visit.Status != clinicalencounter.StatusCompleted {
 		t.Errorf("Expected status completed, got %s", visit.Status)
+	}
+	if visit.FinishedAt == 0 {
+		t.Error("FinishedAt must be set after CompleteVisit")
+	}
+	if visit.StartedAt > visit.FinishedAt {
+		t.Error("StartedAt must not be after FinishedAt")
 	}
 	if len(pub.events) != 3 || pub.events[2] != clinicalencounter.EventVisitCompleted {
 		t.Errorf("Expected EventVisitCompleted")
@@ -89,6 +98,9 @@ func TestVisitStatusFSM_Cancel(t *testing.T) {
 	if v1.Status != clinicalencounter.StatusCancelled {
 		t.Errorf("Expected cancelled")
 	}
+	if v1.FinishedAt == 0 {
+		t.Error("FinishedAt must be set after CancelVisit")
+	}
 	if len(pub.events) != 1 || pub.events[0] != clinicalencounter.EventVisitCancelled {
 		t.Errorf("Expected EventVisitCancelled")
 	}
@@ -107,5 +119,45 @@ func TestVisitStatusFSM_Cancel(t *testing.T) {
 	_, err = mod.CompleteVisit(clinicalencounter.CompleteVisitArgs{ID: v2.ID})
 	if err == nil {
 		t.Errorf("Expected error completing an arrived visit")
+	}
+}
+
+func TestCompleteVisit_WithDiagnostic(t *testing.T) {
+	mod, _ := setupTestModule(t)
+
+	visit, _ := mod.CreateVisit(clinicalencounter.CreateVisitArgs{
+		PatientID: "p1", DoctorID: "d1", Reason: "checkup",
+		PatientNameSnapshot: "Ana", PatientRutSnapshot: "123",
+		DoctorNameSnapshot: "Dr. House", AttentionAt: 1600000000,
+	})
+	visit, _ = mod.MarkArrived(clinicalencounter.MarkArrivedArgs{ID: visit.ID})
+	visit, _ = mod.MarkTriaged(clinicalencounter.MarkTriagedArgs{ID: visit.ID})
+	visit, _ = mod.StartVisit(clinicalencounter.StartVisitArgs{ID: visit.ID})
+	visit, err := mod.CompleteVisit(clinicalencounter.CompleteVisitArgs{
+		ID:           visit.ID,
+		Diagnostic:   "Mild flu",
+		Prescription: "Rest and hydration",
+		Cie10Code:    "J11",
+	})
+	if err != nil {
+		t.Fatalf("CompleteVisit failed: %v", err)
+	}
+	if visit.Diagnostic != "Mild flu" {
+		t.Errorf("want Diagnostic 'Mild flu', got %q", visit.Diagnostic)
+	}
+	if visit.Prescription != "Rest and hydration" {
+		t.Errorf("want Prescription 'Rest and hydration', got %q", visit.Prescription)
+	}
+	if visit.Cie10Code != "J11" {
+		t.Errorf("want Cie10Code 'J11', got %q", visit.Cie10Code)
+	}
+
+	// Verify persistence via re-fetch
+	fetched, err := mod.GetVisit(clinicalencounter.GetVisitArgs{ID: visit.ID})
+	if err != nil {
+		t.Fatalf("GetVisit failed: %v", err)
+	}
+	if fetched.Cie10Code != "J11" {
+		t.Errorf("Cie10Code not persisted: got %q", fetched.Cie10Code)
 	}
 }

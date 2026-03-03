@@ -17,12 +17,20 @@ func TestMeasurementType(t *testing.T) {
 		DefaultUnit: "kg",
 		MinNormal:   50.0,
 		MaxNormal:   100.0,
+		LoincCode:   "85354-9",
+		UcumUnit:    "mm[Hg]",
 	})
 	if err != nil {
 		t.Fatalf("CreateMeasurementType failed: %v", err)
 	}
 	if mtype.Name != "Weight" || mtype.DefaultUnit != "kg" || !mtype.IsActive {
 		t.Errorf("Unexpected measurement type properties")
+	}
+	if mtype.LoincCode != "85354-9" {
+		t.Errorf("want LoincCode '85354-9', got %q", mtype.LoincCode)
+	}
+	if mtype.UcumUnit != "mm[Hg]" {
+		t.Errorf("want UcumUnit 'mm[Hg]', got %q", mtype.UcumUnit)
 	}
 
 	// Create Missing args
