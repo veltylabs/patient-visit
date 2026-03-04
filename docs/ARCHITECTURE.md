@@ -29,3 +29,9 @@ Transitions emit business events (`visit.patient_arrived`, `visit.patient_triage
 ## 5. Compliance & Standards
 Para entender el alineamiento de este módulo con estándares internacionales de salud, revisa el anexo de compatibilidad:
 - [HL7 / FHIR Roadmap](FHIR_ROADMAP.md)
+
+## 6. Related Documents
+- [FHIR Roadmap](FHIR_ROADMAP.md)
+- [Database Diagram](diagrams/database.md)
+- [Visit Flow Sequence](diagrams/sequence_visit_flow.md)
+- [SKILL.md](SKILL.md)
